@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
+// import "hardhat/console.sol";
 
 // import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
 
@@ -20,7 +21,7 @@ contract CoinFlip {
         require(choice == 0 || choice == 1, "Choisissez 0 (pile) ou 1 (face)");
 
         uint256 random = uint256(keccak256(abi.encodePacked(block.timestamp, msg.sender))) % 2;
-        
+        // console.log(random, choice);
         if (random == choice) {
             payable(msg.sender).transfer(msg.value * 2);
             emit GameResult(msg.sender, true, msg.value * 2);
