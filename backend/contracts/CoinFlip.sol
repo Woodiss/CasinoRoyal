@@ -23,15 +23,8 @@ contract CoinFlip {
 
         if (random == choice) {
             payable(msg.sender).transfer(msg.value * 2);
-
-            // (bool success, ) = payable(msg.sender).call{value: msg.value * 2}(
-            //     ""
-            // );
-            // require(success, "Transfer failed");
-
             emit GameResult(msg.sender, true, msg.value * 2);
         } else {
-            balances[owner] += msg.value;
             emit GameResult(msg.sender, false, 0);
         }
     }
