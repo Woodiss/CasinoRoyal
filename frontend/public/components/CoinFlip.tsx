@@ -194,6 +194,9 @@ export default function CoinFlip() {
           {/* {isSuccess && (
             <p className="text-green-500 mt-2">Transaction envoyée ! ✅</p>
           )} */}
+          {address === "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80" && (
+            <p>yoloo</p>
+          )}
           {isConfirming && <div>Waiting for confirmation...</div>}
           {isConfirmed && <div>Transaction confirmed.</div>}
           {error && <div>Error: {(error as BaseError).shortMessage || error.message}</div>}
