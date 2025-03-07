@@ -119,8 +119,8 @@
 "use client";
 import { COINFLIP_ABI } from "@/public/coinFlip";
 import { useState } from "react";
-import { type BaseError, useAccount, useContractWrite, useWaitForTransactionReceipt, useWatchContractEvent } from "wagmi";
-import { parseEther } from "viem";
+import { type BaseError, useAccount, useContractWrite, useWaitForTransactionReceipt, useWatchContractEvent, useReadContract } from "wagmi";
+import { parseEther, formatEther } from "viem";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 const CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
@@ -147,6 +147,22 @@ export default function CoinFlip() {
     });
     console.log("Choice : " + BigInt(choice), "BetAmount : " + BigInt(Number(choice)));
   };
+
+  const withdraw =  () => {
+    writeContract({
+      address: CONTRACT_ADDRESS,
+      abi: COINFLIP_ABI,
+      functionName: "withdraw"
+    });
+    // console.log("Choice : " + BigInt(choice), "BetAmount : " + BigInt(Number(choice)));
+  };
+
+  const { data: balance, refetch } = useReadContract({
+    abi: COINFLIP_ABI, // ABI du contrat HETIC ERC20
+    functionName: "balanceOfContract", // Nom de la fonction à appeler
+    address: CONTRACT_ADDRESS, // Adresse du contrat HETIC ERC20
+  });
+
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
     hash,
   });
@@ -194,8 +210,16 @@ export default function CoinFlip() {
           {/* {isSuccess && (
             <p className="text-green-500 mt-2">Transaction envoyée ! ✅</p>
           )} */}
-          {address === "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80" && (
-            <p>yoloo</p>
+          {/* <p>{address}</p> */}
+          {address === "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266" && (
+            <>
+              <button 
+                onClick={withdraw}
+                className="mt-4 bg-blue-500 text-white p-2 rounded">
+                  Récupération des mises
+              </button>
+              <p>{balance ? formatEther(balance) : "0"} ETH</p>
+            </>
           )}
           {isConfirming && <div>Waiting for confirmation...</div>}
           {isConfirmed && <div>Transaction confirmed.</div>}

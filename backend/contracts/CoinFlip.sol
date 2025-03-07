@@ -31,14 +31,18 @@ contract CoinFlip {
 
             emit GameResult(msg.sender, true, msg.value * 2);
         } else {
-            balances[owner] += msg.value;
             emit GameResult(msg.sender, false, 0);
         }
     }
 
     function withdraw() public {
         require(msg.sender == owner, "Seul l'owner peut retirer");
-        payable(owner).transfer(address(this).balance);
+        uint256 toKeep = 5000 * 10**18; // 5000 ETH en wei
+        payable(owner).transfer(address(this).balance - toKeep);
+    }
+
+    function balanceOfContract() public view returns (uint256) {
+        return address(this).balance;
     }
 
     receive() external payable {}
