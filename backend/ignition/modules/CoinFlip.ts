@@ -4,7 +4,7 @@ import { parseEther } from "viem";
 
 const CoinFlipModule = buildModule("CoinFlipModule", (m) => {
   // Définition du montant de départ en ETH
-  const initialBalance = m.getParameter("initialBalance", parseEther("10"));
+  const initialBalance = m.getParameter("initialBalance", parseEther("5000"));
 
   // Déploiement du contrat avec les fonds initiaux
   const coinFlip = m.contract("CoinFlip", [], {

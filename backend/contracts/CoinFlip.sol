@@ -1,14 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
-// import "hardhat/console.sol";
 
-// import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
-
-// contract CoinFlip is VRFConsumerBaseV2 {
 contract CoinFlip {
     address public owner;
     mapping(address => uint256) public balances;
-    
+
     // Événement pour afficher le résultat
     event GameResult(address indexed player, bool won, uint256 amount);
 
@@ -21,13 +17,18 @@ contract CoinFlip {
         require(choice == 0 || choice == 1, "Choisissez 0 (pile) ou 1 (face)");
         require(address(this).balance >= msg.value * 2, "Contrat sans fonds");
 
-
         uint256 random = uint256(
-            keccak256(abi.encodePacked(block.prevrandao, block.timestamp, msg.sender))
+            keccak256(abi.encodePacked(block.prevrandao, block.timestamp))
         ) % 2;
-        
+
         if (random == choice) {
             payable(msg.sender).transfer(msg.value * 2);
+
+            // (bool success, ) = payable(msg.sender).call{value: msg.value * 2}(
+            //     ""
+            // );
+            // require(success, "Transfer failed");
+
             emit GameResult(msg.sender, true, msg.value * 2);
         } else {
             balances[owner] += msg.value;

@@ -119,12 +119,8 @@
 "use client";
 import { COINFLIP_ABI } from "@/public/coinFlip";
 import { useState } from "react";
-import {
-  type BaseError,
-  useAccount,
-  useContractWrite,
-  useWaitForTransactionReceipt,
-} from "wagmi";
+import { type BaseError, useAccount, useContractWrite, useWaitForTransactionReceipt, useWatchContractEvent } from "wagmi";
+import { parseEther } from "viem";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 const CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
@@ -133,26 +129,39 @@ export default function CoinFlip() {
   const { address } = useAccount();
   const [betAmount, setBetAmount] = useState("");
   const [choice, setChoice] = useState(0);
-  console.log("Amount :" + betAmount, "Choice :" + choice);
-  console.log(address);
+  const [gameResult, setGameResult] = useState<{ won: boolean; amount: number } | null>(null);
+
+  // console.log("Amount :" + betAmount, "Choice :" + choice);
+  // console.log(address);
+  
 
   const { data: hash, writeContract, error } = useContractWrite();
 
-  const handleBet = async () => {
+  const handleBet =  () => {
     writeContract({
       address: CONTRACT_ADDRESS,
       abi: COINFLIP_ABI,
       functionName: "flipCoin",
       args: [BigInt(choice)],
-      value: BigInt(Number(betAmount) * 1e18) 
-      // overrides: { value: BigInt(Number(betAmount) * 1e18) },
+      value: parseEther(betAmount), 
     });
+    console.log("Choice : " + BigInt(choice), "BetAmount : " + BigInt(Number(choice)));
   };
-  const { isLoading: isConfirming, isSuccess: isConfirmed } =
-    useWaitForTransactionReceipt({
-      hash,
-    });
+  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+    hash,
+  });
   console.log({ isLoading: isConfirming, isSuccess: isConfirmed });
+
+  // Écoute de l'évenement GameResult
+  useWatchContractEvent({
+    address: CONTRACT_ADDRESS,
+    abi: COINFLIP_ABI,
+    eventName: "GameResult",
+    onLogs(logs) {
+      console.log(logs);
+      console.log("test logs");
+    },
+  });
 
   return (
     <div className="w-fit mx-auto p-8 text-center">
@@ -168,16 +177,10 @@ export default function CoinFlip() {
             className="border p-2 rounded mt-4"
           />
           <div className="mt-4">
-            <button
-              onClick={() => setChoice(0)}
-              className="bg-gray-300 p-2 rounded"
-            >
+            <button onClick={() => setChoice(0)} className="bg-gray-300 p-2 rounded">
               Pile
             </button>
-            <button
-              onClick={() => setChoice(1)}
-              className="bg-gray-300 p-2 rounded ml-2"
-            >
+            <button onClick={() => setChoice(1)} className="bg-gray-300 p-2 rounded ml-2">
               Face
             </button>
           </div>
@@ -193,11 +196,7 @@ export default function CoinFlip() {
           )} */}
           {isConfirming && <div>Waiting for confirmation...</div>}
           {isConfirmed && <div>Transaction confirmed.</div>}
-          {error && (
-            <div>
-              Error: {(error as BaseError).shortMessage || error.message}
-            </div>
-          )}
+          {error && <div>Error: {(error as BaseError).shortMessage || error.message}</div>}
         </>
       )}
     </div>
